@@ -524,7 +524,7 @@ Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":8080") -
 if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
-if ($Option -eq '3'){Write-Host "Starting Remote Access";RemoteAccess}
+if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
 
 # ============================================================ END OF SCRIPT =================================================================
 
