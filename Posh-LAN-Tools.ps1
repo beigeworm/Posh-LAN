@@ -493,13 +493,13 @@ Write-Host "============================== Setup Complete ======================
 pause
 
 Header
-$Option = Read-Host "============================
-1. File Server
-2. Screenshare
-3. Command Input
-4. Remote Access
+$Option = Read-Host "===========================================================
+1. File Server - Share files from $hpath
+2. Screenshare - Show $env:COMPUTERNAME's screen
+3. Command Input - Start a PS console for $env:COMPUTERNAME
+4. Remote Access - Pranks and tools
 5. Exit
-============================
+===========================================================
 Choose an Option"
 
 Header
