@@ -28,7 +28,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-# Admin perms
+# Check for Admin perms and stager indicator ($stage = 'y')
 Write-Host "Checking User Permissions.." -ForegroundColor DarkGray
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
     Write-Host "Admin privileges needed for this script..." -ForegroundColor Red
@@ -38,7 +38,7 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     if ($stage -eq 'y'){
-        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -C `$vbs = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
+        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
     else{
         Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
@@ -498,6 +498,7 @@ $Option = Read-Host "============================
 2. Screenshare
 3. Command Input
 4. Remote Access
+5. Exit
 ============================
 Choose an Option"
 
@@ -520,7 +521,7 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-
+if ($Option -eq '5'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
 $webServer.Stop()
