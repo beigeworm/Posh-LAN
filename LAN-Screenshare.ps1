@@ -10,7 +10,7 @@ USAGE
 
 #>
 
-$HideWindow = "true"   #     true = HIDE WINDOW  /   false = SHOW WINDOW
+$HideWindow = "false"   #     true = HIDE WINDOW  /   false = SHOW WINDOW
 
 $Host.UI.RawUI.BackgroundColor = "Black"
 Clear-Host
@@ -63,7 +63,6 @@ $webServer.Prefixes.Add("http://"+$loip+":8080/")
 $webServer.Prefixes.Add("http://localhost:8080/")
 $webServer.Start()
 Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":5000")
-Start-Process msg.exe -ArgumentList ("* `" SERVER IP : http://$loip`:8080`"")
 while ($true) {
     $screen = [System.Windows.Forms.Screen]::PrimaryScreen
     $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
@@ -88,6 +87,15 @@ while ($true) {
         <head>
             <title>Streaming Video</title>
             <meta http-equiv='refresh' content='$refreshIntervalInSeconds'>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          img {
+            width: 90vw;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+          }
+        </style>
         </head>
         <body>
             <img src='/stream' alt='Streaming Video' />
@@ -103,3 +111,4 @@ while ($true) {
 }
 
 $webServer.Stop()
+
