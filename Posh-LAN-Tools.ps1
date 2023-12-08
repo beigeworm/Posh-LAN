@@ -37,15 +37,20 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $fpath = $PWD.Path
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
-    Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-    exit
+    if ($vbs -eq 'y'){
+        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -C `$vbs = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
     else{
+        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+    }
+    exit
+}
+else{
     sleep 1
     Write-Host "This script is running as Admin!"  -ForegroundColor Green
     if (-Not (Test-Path -Path "$env:temp/homepath.txt")){
-    $fpath = Read-Host "Input the local path for the folder you want to host "
-    $fpath | Out-File -FilePath "$env:temp/homepath.txt"
+        $fpath = Read-Host "Input the local path for the folder you want to host "
+        $fpath | Out-File -FilePath "$env:temp/homepath.txt"
     }
 }
 
