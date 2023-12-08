@@ -7,29 +7,26 @@ Start up a HTTP server and run a selection of Local Area Network Tools.
 USAGE
 1. Run this script on target computer and note the URL provided
 2. on another device on the same network, enter the provided URL in a browser window
-
 #>
 
 # Setup for the console
 [Console]::BackgroundColor = "Black"
 Clear-Host
-[Console]::SetWindowSize(88, 30)
+[Console]::SetWindowSize(78, 30)
 $windowTitle = "BeigeTools | LAN Tools"
 [Console]::Title = $windowTitle
-Write-Host "=======================================================================================" -ForegroundColor Green -BackgroundColor Black
-Write-Host "============================= Beigeworm's LAN Toolset =================================" -ForegroundColor Green -BackgroundColor Black
-Write-Host "=======================================================================================`n" -ForegroundColor Green -BackgroundColor Black
+Write-Host "=============================================================================" -ForegroundColor Green -BackgroundColor Black
+Write-Host "======================== Beigeworm's LAN Toolset ============================" -ForegroundColor Green -BackgroundColor Black
+Write-Host "=============================================================================`n" -ForegroundColor Green -BackgroundColor Black
 Write-Host "More info at : https://github.com/beigeworm" -ForegroundColor DarkGray
 Write-Host "This script will start a local area network toolset.`n"
 sleep 1
 
 # Add Libraries
-Write-Host "================================== Server Setup =======================================" -ForegroundColor Green
+Write-Host "============================= Server Setup ==================================" -ForegroundColor Green
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore,PresentationFramework
-Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
-
 
 # Admin perms
 Write-Host "Checking User Permissions.." -ForegroundColor DarkGray
@@ -50,7 +47,7 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $fpath = Read-Host "Input the local path for the folder you want to host "
     $fpath | Out-File -FilePath "$env:temp/homepath.txt"
     }
-    }
+}
 
 # Detect Network Hardware
 Write-Host "Detecting primary network interface." -ForegroundColor DarkGray
@@ -67,25 +64,27 @@ if ($primaryInterface) {
     } else {
         Write-Output "Unknown primary internet connection."
     }
-    } else {Write-Output "No primary internet connection found."}
+} else {Write-Output "No primary internet connection found."}
 
 # Root folder setup
-Write-Host "===================================== Folder Setup ===================================="  -ForegroundColor Green
+Write-Host "=============================== Folder Setup ================================"  -ForegroundColor Green
 Write-Host "Checking folder path.." -ForegroundColor DarkGray
 $hpath = Get-Content -Path "$env:temp/homepath.txt"
 cd "$hpath"
-Write-Host "Setting folder root as : $hpath `n" 
+Write-Host "Setting folder root as : $hpath" -ForegroundColor Cyan
 $webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $PWD.Path
 
-
 # Open Port 8080 and start listener
+Write-Host "=============================== Network Setup ==============================="  -ForegroundColor Green
+Write-Host "Opening Firewall at Port 8080" -ForegroundColor DarkGray
 New-NetFirewallRule -DisplayName "AllowWebServer" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow | Out-Null
 $webServer = New-Object System.Net.HttpListener 
 $webServer.Prefixes.Add("http://"+$loip+":8080/")
 $webServer.Prefixes.Add("http://localhost:8080/")
+Write-Host "Starting HTTP Server.." -ForegroundColor DarkGray
 $webServer.Start()
 [byte[]]$buffer = $null
-Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":8080 `n")
+Write-Host ("Other Network Devices Can Reach the Server At : http://"+$loip+":8080 `n") -ForegroundColor Cyan
 Remove-Item -Path "$env:temp/homepath.txt" -Force
 
 # Functions
@@ -112,9 +111,7 @@ Function DisplayWebpage {
     $ctx.Response.ContentLength64 = $buffer.Length;
     $ctx.Response.OutputStream.WriteAsync($buffer, 0, $buffer.Length)
 }
-
 while ($webServer.IsListening){try {$ctx = $webServer.GetContext();
-
     if ($ctx.Request.RawUrl -eq "/") {
         DisplayWebpage
     }
@@ -131,10 +128,8 @@ while ($webServer.IsListening){try {$ctx = $webServer.GetContext();
             $files = Get-ChildItem -Path $PWD.Path -Force
             $folderPath = $PWD.Path
             DisplayWebpage
-        }
-    
+        }   
     }catch [System.Net.HttpListenerException] {Write-Host ($_);}}
-
 }
 
 
@@ -255,7 +250,6 @@ while ($true) {
     $webServerContext = $webServer.GetContext() 
     $request = $webServerContext.Request
     $response = $webServerContext.Response
-
         if ($request.RawUrl -eq "/stream") {
             $response.ContentType = "image/png"
             $stream.CopyTo($response.OutputStream)
@@ -264,33 +258,35 @@ while ($true) {
             $response.ContentType = "text/html"
             $refreshScript = @"
             <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Streaming Video</title>
-                <meta http-equiv='refresh' content='$refreshIntervalInSeconds'>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <html><head>
+            <title>Streaming Video</title>
+            <meta http-equiv='refresh' content='$refreshIntervalInSeconds'>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              img {
-                width: 90vw;
-                height: auto;
-                max-width: 100%;
-                max-height: 100%;
-              }
+            body { font-family: Arial, sans-serif; margin: 30px; background-color: #7c7d71; }
+            .container { display: flex; align-items: center; }
+            a { color: #000; text-decoration: none; font-size: 16px; padding-left: 10px; }
+            button { background-color: #40ad24; color: #FFF; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+            .stop-button { position: relative; top: -5px; font-size: 18px; margin-left: 30px; background-color: #cf2b2b; color: #FFF; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+            img {width: 90vw;height: auto;max-width: 100%;max-height: 100%;}
             </style>
             </head>
             <body>
+            <div class='container'><h1> LAN Screenshare</h1><a href='/stop'><button class='stop-button'>STOP SERVER</button></a></div><ul>
                 <img src='/stream' alt='Streaming Video' />
             </body>
             </html>
 "@
             $buffer = [System.Text.Encoding]::UTF8.GetBytes($refreshScript)
             $response.OutputStream.Write($buffer, 0, $buffer.Length)
+            if ($request.RawUrl -eq "/stop") {
+                $WebServer.Stop();
+                break
+            }
         }
-
     $response.Close()
     $stream.Dispose()
-}
-} Out-Null
+}}
 
 
 Function RemoteAccess{
@@ -335,9 +331,7 @@ Function DisplayWebpage {
     $ctx.Response.ContentLength64 = $buffer.Length;
     $ctx.Response.OutputStream.WriteAsync($buffer, 0, $buffer.Length)
 }
-
 while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
-
     if ($ctx.Request.RawUrl -eq "/") {
         $files = Get-ChildItem -Path $PWD.Path -Force
         $folderPath = $PWD.Path
@@ -422,21 +416,18 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
     Get-ChildItem C:\Windows\Media\ -File -Filter *.wav | Select-Object -ExpandProperty Name | Foreach-Object { Start-Sleep -Seconds 3; (New-Object Media.SoundPlayer "C:\WINDOWS\Media\$_").Play(); }
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/dark") {     
     $Theme = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
     Set-ItemProperty $Theme AppsUseLightTheme -Value 0
     Start-Sleep 1
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/light") {     
     $Theme = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
     Set-ItemProperty $Theme AppsUseLightTheme -Value 1
     Start-Sleep 1
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/rroll") {     
     $tobat = @'
     Set WshShell = WScript.CreateObject("WScript.Shell")
@@ -454,7 +445,6 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
     Remove-Item -Path $pth -Force
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/joke") {     
     Add-Type -AssemblyName System.speech
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -465,7 +455,6 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
     $SpeechSynth.Speak($DadJoke)
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/inputon") {     
     $PNPKeyboard = Get-WmiObject Win32_USBControllerDevice | %{[wmi]$_.dependent} | ?{$_.pnpclass -eq 'Keyboard'}
     $PNPKeyboard.Enable()
@@ -474,7 +463,6 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
     $PNPMice.Enable()
     Write-Output "Done."
     }
-    
     elseif ($ctx.Request.RawUrl -match "^/inputoff") {     
     $PNPMice = Get-WmiObject Win32_USBControllerDevice | %{[wmi]$_.dependent} | ?{$_.pnpclass -eq 'Mouse'}
     $PNPMice.Disable()
@@ -487,14 +475,16 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
 
 }
 
-
+# ==================================================== MAIN WAIT LOOP ============================================================
 Function Header {
 Clear-Host
-Write-Host "=======================================================================================" -ForegroundColor Green
-Write-Host "============================= Beigeworm's LAN Toolset =================================" -ForegroundColor Green 
-Write-Host "=======================================================================================`n" -ForegroundColor Green
+Write-Host "=============================================================================" -ForegroundColor Green
+Write-Host "======================== Beigeworm's LAN Toolset ============================" -ForegroundColor Green 
+Write-Host "=============================================================================" -ForegroundColor Green
+Write-Host "More info `@ https://github.com/beigeworm`n" -ForegroundColor DarkGray
 }
 
+Write-Host "============================== Setup Complete ==============================="  -ForegroundColor Green
 pause
 
 Header
