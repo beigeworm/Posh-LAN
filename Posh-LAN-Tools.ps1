@@ -1,8 +1,8 @@
 <#
-================================================= Beigeworm's Screen Stream over HTTP ==========================================================
+================================================= Beigeworm's Powershell LAN Toolset ==========================================================
 
 SYNOPSIS
-Start up a HTTP server and stream the desktop to a browser window.
+Start up a HTTP server and run a selection of Local Area Network Tools.
 
 USAGE
 1. Run this script on target computer and note the URL provided
