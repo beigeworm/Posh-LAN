@@ -14,6 +14,7 @@ LAN Toolset in Powershell Including File-Server, Screenshare and Reverse PS Shel
 Transfer files, control the computer, view the screen on another device..
 
 <h3>How?</h3>
+
 1. Checks for Admin and restarts script
 2. Opens firewall to incoming requests on port 8080
 3. Sets folder as the folder the script/stager starts in
@@ -22,6 +23,7 @@ Transfer files, control the computer, view the screen on another device..
 6. Starts the webpage on the machine ip address
 
 <h3>FAQ</h3>
+
 1. Why admin? - Needed for opening ports in Windows firewall
 2. Can the script be killed from the browser? - Yes.
 3. Future Updates? - Coming soon.
