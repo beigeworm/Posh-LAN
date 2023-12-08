@@ -37,7 +37,7 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $fpath = $PWD.Path
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
-    if ($vbs -eq 'y'){
+    if ($stage -eq 'y'){
         Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -C `$vbs = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
     else{
