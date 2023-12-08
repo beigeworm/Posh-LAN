@@ -30,11 +30,11 @@ Transfer files, control the computer, view the screen on another device..
 **Setup**
 ![setup](https://github.com/beigeworm/Posh-LAN/assets/93350544/0f3eb03d-dd32-40b4-b21e-8ed02614769f)
 
-**File Server**
+**File Server (In Browser)**
 ![files](https://github.com/beigeworm/Posh-LAN/assets/93350544/ce05e881-601d-47aa-b53d-2136e4ace725)
 
-**Screenshare**
+**Screenshare (In Browser)**
 ![scrn](https://github.com/beigeworm/Posh-LAN/assets/93350544/3b7fbb63-f6ee-4796-9e39-5fc4274f95ca)
 
-**Commands**
+**Commands (In Browser)**
 ![command](https://github.com/beigeworm/Posh-LAN/assets/93350544/5a85e798-a695-41bb-a562-66d982e38538)
