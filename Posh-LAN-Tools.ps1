@@ -15,10 +15,16 @@ Clear-Host
 [Console]::SetWindowSize(78, 30)
 $windowTitle = "BeigeTools | LAN Tools"
 [Console]::Title = $windowTitle
-Write-Host "=============================================================================" -ForegroundColor Green -BackgroundColor Black
-Write-Host "======================== Beigeworm's LAN Toolset ============================" -ForegroundColor Green -BackgroundColor Black
-Write-Host "=============================================================================`n" -ForegroundColor Green -BackgroundColor Black
-Write-Host "More info at : https://github.com/beigeworm" -ForegroundColor DarkGray
+
+Function Header {
+Clear-Host
+Write-Host "=============================================================================" -ForegroundColor Green
+Write-Host "======================== Beigeworm's LAN Toolset ============================" -ForegroundColor Green 
+Write-Host "=============================================================================" -ForegroundColor Green
+Write-Host "More info `@ https://github.com/beigeworm`n" -ForegroundColor DarkGray
+}
+
+Header
 Write-Host "This script will start a local area network toolset.`n"
 sleep 1
 
@@ -481,13 +487,6 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
 }
 
 # ==================================================== MAIN WAIT LOOP ============================================================
-Function Header {
-Clear-Host
-Write-Host "=============================================================================" -ForegroundColor Green
-Write-Host "======================== Beigeworm's LAN Toolset ============================" -ForegroundColor Green 
-Write-Host "=============================================================================" -ForegroundColor Green
-Write-Host "More info `@ https://github.com/beigeworm`n" -ForegroundColor DarkGray
-}
 
 Write-Host "============================== Setup Complete ==============================="  -ForegroundColor Green
 pause
