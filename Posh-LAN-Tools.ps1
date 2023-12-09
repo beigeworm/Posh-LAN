@@ -38,10 +38,10 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     if ($stage -eq 'y'){
-        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
+        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
     else{
-        Start-Process PowerShell.exe -ArgumentList ("-NoProfile -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
     }
     exit
 }
@@ -503,7 +503,9 @@ $Option = Read-Host "===========================================================
 Choose an Option"
 
 Header
+if (!($Option -eq '5')){
 $hide = Read-Host "Would you like to hide this window (Y/N)"
+}
 
 Header
 Write-Host "Loading Script.." -ForegroundColor Yellow
