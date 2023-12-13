@@ -43,3 +43,5 @@ Transfer files, control the computer, view the screen on another device..
 
 **Commands (In Browser)**
 ![command](https://github.com/beigeworm/Posh-LAN/assets/93350544/5a85e798-a695-41bb-a562-66d982e38538)
+
+# If you like my work please leave a star. ⭐
