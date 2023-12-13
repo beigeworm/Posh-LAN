@@ -3,6 +3,7 @@
 **SYNOPSIS**
 
 LAN Toolset in Powershell Including File-Server, Screenshare and Reverse PS Shell, all over HTTP. 
+Starts a HTTP server on the machine, open on port 8080.   
 
 **USAGE**
 1. Run the Script or stager on the target computer
