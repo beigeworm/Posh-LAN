@@ -497,12 +497,13 @@ $Option = Read-Host "===========================================================
 2. Screenshare - Show $env:COMPUTERNAME's screen
 3. Command Input - Start a PS console for $env:COMPUTERNAME
 4. Remote Access - Pranks and tools
-5. Exit
+5. Root File Server - Share files system root
+6. Exit
 ===========================================================
 Choose an Option"
 
 Header
-if (!($Option -eq '5')){
+if (!($Option -eq '6')){
 $hide = Read-Host "Would you like to hide this window (Y/N)"
 }
 
@@ -531,7 +532,8 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-if ($Option -eq '5'){Write-Host "Closing Beigeworm's LAN Toolset.."}
+if ($Option -eq '5'){Write-Host "Starting Root File Server";$homepath = "$env:HOMEDRIVE/";FileServer}
+if ($Option -eq '6'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
 $webServer.Stop()
