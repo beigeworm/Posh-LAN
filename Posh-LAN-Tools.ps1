@@ -41,7 +41,9 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     Write-Host "Admin privileges needed for this script..." -ForegroundColor Red
     Write-Host "This script will self elevate to run as an Administrator and continue." -ForegroundColor DarkGray
     Write-Host "Sending User Prompt."  -ForegroundColor Green
+    if ($fpath.Ln -eq 0){
     $fpath = $PWD.Path
+    }
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     if ($stage -eq 'y'){
@@ -492,7 +494,13 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
 # ==================================================== MAIN WAIT LOOP ============================================================
 
 Write-Host "============================== Setup Complete ==============================="  -ForegroundColor Green
+
+if ($opt5 -eq 1){
+FileServer
+}
+else{
 pause
+}
 
 Header
 $Option = Read-Host "===========================================================
@@ -535,13 +543,21 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-if ($Option -eq '5'){Write-Host "Starting Root File Server";
-Remove-PSDrive -Name webroot -PSProvider FileSystem;
-cd "$env:HOMEDRIVE/";
-$fpath = "$env:HOMEDRIVE/"
-$webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $fpath
-$fpath | Out-File -FilePath "$env:temp/homepath.txt"
-FileServer
+if ($Option -eq '5'){
+    Write-Host "Starting Root File Server"
+    cd "$env:HOMEDRIVE/"
+    $opt5 = 1
+    $fpath = "$env:HOMEDRIVE/"
+    $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
+    sleep 1
+    if ($stage -eq 'y'){
+        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
+    }
+    else{
+        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+    }
+    exit
+}
 }
 if ($Option -eq '6'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
