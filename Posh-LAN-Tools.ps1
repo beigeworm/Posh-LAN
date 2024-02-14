@@ -493,7 +493,8 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
 
 Write-Host "============================== Setup Complete ==============================="  -ForegroundColor Green
 
-if ($opt5 -eq 1){
+if ($global:opt5 -eq 1){
+$global:opt5 = 0
 FileServer
 }
 else{
@@ -544,12 +545,13 @@ if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
 if ($Option -eq '5'){
     Write-Host "Starting Root File Server"
     cd "$env:HOMEDRIVE/"
-    $opt5 = 1
+    $global:opt5 = 1
     $fpath = "$env:HOMEDRIVE/"
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     $webServer.Stop();
     Remove-PSDrive -Name webroot -PSProvider FileSystem;
+    sleep 3
     if ($stage -eq 'y'){
         Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
