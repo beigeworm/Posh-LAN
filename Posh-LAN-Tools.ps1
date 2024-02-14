@@ -506,7 +506,7 @@ $Option = Read-Host "===========================================================
 2. Screenshare - Show $env:COMPUTERNAME's screen
 3. Command Input - Start a PS console for $env:COMPUTERNAME
 4. Remote Access - Pranks and tools
-5. Root File Server - Share files system root
+5. Restart as File Server from system root
 6. Exit
 ===========================================================
 Choose an Option"
