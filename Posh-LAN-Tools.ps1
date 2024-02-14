@@ -544,9 +544,9 @@ if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
 if ($Option -eq '5'){
     Write-Host "Starting Root File Server"
-    cd "$env:HOMEDRIVE/"
+    cd "$env:HOMEDRIVE\"
     $global:opt5 = 1
-    $fpath = "$env:HOMEDRIVE/"
+    $fpath = "$env:HOMEDRIVE\"
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     $webServer.Stop();
