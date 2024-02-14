@@ -34,6 +34,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
+function AdminCheck {
 # Check for Admin perms and stager indicator ($stage = 'y')
 Write-Host "Checking User Permissions.." -ForegroundColor DarkGray
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
@@ -59,6 +60,8 @@ else{
         $fpath | Out-File -FilePath "$env:temp/homepath.txt"
     }
 }
+}
+AdminCheck
 
 # Detect Network Hardware
 Write-Host "Detecting primary network interface." -ForegroundColor DarkGray
@@ -532,7 +535,14 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-if ($Option -eq '5'){Write-Host "Starting Root File Server";Remove-PSDrive -Name webroot -PSProvider FileSystem; cd "$env:HOMEDRIVE/"; $webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $PWD.Path;FileServer}
+if ($Option -eq '5'){Write-Host "Starting Root File Server";
+Remove-PSDrive -Name webroot -PSProvider FileSystem;
+cd "$env:HOMEDRIVE/";
+$fpath = "$env:HOMEDRIVE/"
+$webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $fpath
+$fpath | Out-File -FilePath "$env:temp/homepath.txt"
+FileServer
+}
 if ($Option -eq '6'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
