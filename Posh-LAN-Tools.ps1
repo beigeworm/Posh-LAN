@@ -532,7 +532,7 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-if ($Option -eq '5'){Write-Host "Starting Root File Server";cd "$env:HOMEDRIVE/";$webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $PWD.Path;FileServer}
+if ($Option -eq '5'){Write-Host "Starting Root File Server";Remove-PSDrive -Name webroot -PSProvider FileSystem; cd "$env:HOMEDRIVE/"; $webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $PWD.Path;FileServer}
 if ($Option -eq '6'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
