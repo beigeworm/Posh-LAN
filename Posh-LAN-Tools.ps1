@@ -41,9 +41,7 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     Write-Host "Admin privileges needed for this script..." -ForegroundColor Red
     Write-Host "This script will self elevate to run as an Administrator and continue." -ForegroundColor DarkGray
     Write-Host "Sending User Prompt."  -ForegroundColor Green
-    if ($fpath.Ln -eq 0){
     $fpath = $PWD.Path
-    }
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
     if ($stage -eq 'y'){
@@ -550,6 +548,8 @@ if ($Option -eq '5'){
     $fpath = "$env:HOMEDRIVE/"
     $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
     sleep 1
+    $webServer.Stop();
+    Remove-PSDrive -Name webroot -PSProvider FileSystem;
     if ($stage -eq 'y'){
         Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
     }
