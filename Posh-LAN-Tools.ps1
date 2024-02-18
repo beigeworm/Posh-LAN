@@ -34,7 +34,6 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-function AdminCheck {
 # Check for Admin perms and stager indicator ($stage = 'y')
 Write-Host "Checking User Permissions.." -ForegroundColor DarkGray
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
@@ -60,8 +59,6 @@ else{
         $fpath | Out-File -FilePath "$env:temp/homepath.txt"
     }
 }
-}
-AdminCheck
 
 # Detect Network Hardware
 Write-Host "Detecting primary network interface." -ForegroundColor DarkGray
@@ -87,7 +84,7 @@ $hpath = Get-Content -Path "$env:temp/homepath.txt"
 cd "$hpath"
 Write-Host "Setting folder root as : $hpath" -ForegroundColor Cyan
 $webroot = New-PSDrive -Name webroot -PSProvider FileSystem -Root $PWD.Path
-
+[byte[]]$buffer = $null
 # Open Port 8080 and start listener
 Write-Host "=============================== Network Setup ==============================="  -ForegroundColor Green
 Write-Host "Opening Firewall at Port 8080" -ForegroundColor DarkGray
@@ -97,7 +94,6 @@ $webServer.Prefixes.Add("http://"+$loip+":8080/")
 $webServer.Prefixes.Add("http://localhost:8080/")
 Write-Host "Starting HTTP Server.." -ForegroundColor DarkGray
 $webServer.Start()
-[byte[]]$buffer = $null
 Write-Host ("Other Network Devices Can Reach the Server At : http://"+$loip+":8080 `n") -ForegroundColor Cyan
 Remove-Item -Path "$env:temp/homepath.txt" -Force
 
@@ -492,14 +488,7 @@ while ($WebServer.IsListening){try {$ctx = $WebServer.GetContext();
 # ==================================================== MAIN WAIT LOOP ============================================================
 
 Write-Host "============================== Setup Complete ==============================="  -ForegroundColor Green
-
-if ($global:opt5 -eq 1){
-$global:opt5 = 0
-FileServer
-}
-else{
 pause
-}
 
 Header
 $Option = Read-Host "===========================================================
@@ -507,13 +496,12 @@ $Option = Read-Host "===========================================================
 2. Screenshare - Show $env:COMPUTERNAME's screen
 3. Command Input - Start a PS console for $env:COMPUTERNAME
 4. Remote Access - Pranks and tools
-5. Restart as File Server from system root
-6. Exit
+5. Exit
 ===========================================================
 Choose an Option"
 
 Header
-if (!($Option -eq '6')){
+if (!($Option -eq '5')){
 $hide = Read-Host "Would you like to hide this window (Y/N)"
 }
 
@@ -542,28 +530,10 @@ if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
 if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
 if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
-if ($Option -eq '5'){
-    Write-Host "Starting Root File Server"
-    cd "$env:HOMEDRIVE\"
-    $global:opt5 = 1
-    $fpath = "$env:HOMEDRIVE\"
-    $fpath | Out-File -FilePath "$env:temp/homepath.txt" -Force
-    sleep 1
-    $webServer.Stop();
-    Remove-PSDrive -Name webroot -PSProvider FileSystem;
-    sleep 3
-    if ($stage -eq 'y'){
-        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -C `$stage = 'y'; irm https://raw.githubusercontent.com/beigeworm/Posh-LAN/main/Posh-LAN-Tools.ps1 | iex") -Verb RunAs
-    }
-    else{
-        Start-Process PowerShell.exe -ArgumentList ("-NoP -Ep Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-    }
-    exit
-}
-
-if ($Option -eq '6'){Write-Host "Closing Beigeworm's LAN Toolset.."}
+if ($Option -eq '5'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
 $webServer.Stop()
 Write-Host "Server Stopped!" -ForegroundColor Green
 Sleep 1
+
