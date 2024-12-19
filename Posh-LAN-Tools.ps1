@@ -273,51 +273,6 @@ while ($true) {
 $webServer.Stop()
 }
 
-# Functions
-Function CommandInput{
-# ============================================================== COMMAND PAGE ====================================================================
-Function DisplayWebpage {
-    $html = "<html><head><style>"
-    $html += "body { font-family: Arial, sans-serif; margin: 30px; background-color: #7c7d71; }"
-    $html += ".container { display: flex; align-items: center; }"
-    $html += "textarea { width: 80%; padding: 10px; font-size: 14px; }"
-    $html += "input[type='submit'] { position: relative; top: -12px; margin-left: 30px; padding: 10px 20px; background-color: #cf2b2b; color: #FFF; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; }"
-    $html += "button { background-color: #40ad24; color: #FFF; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }"
-    $html += ".stop-button { position: relative; top: -5px; font-size: 18px; margin-left: 30px; background-color: #cf2b2b; color: #FFF; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }"
-    $html += "pre { background-color: #f7f7f7; padding: 10px; border-radius: 4px; }"
-    $html += "</style></head><body>"
-    $html += "<div class='container'><h1> PowerShell Command Input</h1><a href='/stop'><button class='stop-button'>STOP SERVER</button></a></div><ul>"
-    $html += "<h3>Command Input</h3>"
-    $html += "<form method='post' action='/execute'>"
-    $html += "<span><textarea name='command' rows='1' cols='80'></textarea><input type='submit' value='Execute'></span><br>"
-    $html += "</form>"
-    $html += "<h3>Output</h3><pre name='output' rows='10' cols='80'>$output</pre></body></html>"
-    $html += "</body></html>"
-    $buffer = [System.Text.Encoding]::UTF8.GetBytes($html);
-    $ctx.Response.ContentLength64 = $buffer.Length;
-    $ctx.Response.OutputStream.WriteAsync($buffer, 0, $buffer.Length)
-}
-while ($webServer.IsListening){try {$ctx = $webServer.GetContext();
-    if ($ctx.Request.RawUrl -eq "/") {
-        DisplayWebpage
-    }
-    elseif ($ctx.Request.RawUrl -eq "/stop") {
-        $webServer.Stop();
-        Remove-PSDrive -Name webroot -PSProvider FileSystem;
-    }
-    elseif ($ctx.Request.RawUrl -eq "/execute" -and $ctx.Request.HttpMethod -eq "POST") {
-            $reader = New-Object IO.StreamReader $ctx.Request.InputStream,[System.Text.Encoding]::UTF8
-            $postParams = $reader.ReadToEnd()
-            $reader.Close()
-            $command = $postParams.Split('=')[1] -replace "%20", " "
-            $output = Invoke-Expression $command | Out-String
-            $files = Get-ChildItem -Path $PWD.Path -Force
-            $folderPath = $PWD.Path
-            DisplayWebpage
-        }   
-    }catch [System.Net.HttpListenerException] {Write-Host ($_);}}
-}
-
 
 # ==================================================== MAIN WAIT LOOP ============================================================
 
