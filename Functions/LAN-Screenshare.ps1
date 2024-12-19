@@ -10,15 +10,12 @@ USAGE
 
 #>
 
-$HideWindow = "false"   #     true = HIDE WINDOW  /   false = SHOW WINDOW
+$HideWindow = "false"   # true = HIDE WINDOW  /  false = SHOW WINDOW
 
-$Host.UI.RawUI.BackgroundColor = "Black"
+[Console]::BackgroundColor = "Black"
 Clear-Host
-$width = 88
-$height = 30
-[Console]::SetWindowSize($width, $height)
-$windowTitle = "HTTP Screenshare"
-[Console]::Title = $windowTitle
+[Console]::SetWindowSize(88,30)
+[Console]::Title = "HTTP Screenshare"
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
@@ -62,53 +59,74 @@ $webServer = New-Object System.Net.HttpListener
 $webServer.Prefixes.Add("http://"+$loip+":8080/")
 $webServer.Prefixes.Add("http://localhost:8080/")
 $webServer.Start()
-Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":5000")
+Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":8080")
 while ($true) {
-    $screen = [System.Windows.Forms.Screen]::PrimaryScreen
-    $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
-    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-    $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size)
-    $stream = New-Object System.IO.MemoryStream 
-    $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
-    $stream.Seek(0, [System.IO.SeekOrigin]::Begin) | Out-Null
+    try {
+        $context = $webServer.GetContext()
+        $response = $context.Response
+        if ($context.Request.RawUrl -eq "/stream") {
+            $response.ContentType = "multipart/x-mixed-replace; boundary=frame"
+            $response.Headers.Add("Cache-Control", "no-cache")
+            $boundary = "--frame"
 
-    $webServerContext = $webServer.GetContext() 
-    $request = $webServerContext.Request
-    $response = $webServerContext.Response
+            while ($context.Response.OutputStream.CanWrite) {
+                $screen = [System.Windows.Forms.Screen]::PrimaryScreen
+                $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
+                $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+                $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size)
 
-    if ($request.RawUrl -eq "/stream") {
-        $response.ContentType = "image/png"
-        $stream.CopyTo($response.OutputStream)
-    } else {
-        $response.ContentType = "text/html"
-        $refreshScript = @"
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Streaming Video</title>
-            <meta http-equiv='refresh' content='$refreshIntervalInSeconds'>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          img {
-            width: 90vw;
-            height: auto;
-            max-width: 100%;
-            max-height: 100%;
-          }
-        </style>
-        </head>
-        <body>
-            <img src='/stream' alt='Streaming Video' />
-        </body>
-        </html>
+                $stream = New-Object System.IO.MemoryStream
+                $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+                $bitmap.Dispose()
+                $graphics.Dispose()
+
+                $bytes = $stream.ToArray()
+                $stream.Dispose()
+
+                $writer = [System.Text.Encoding]::ASCII.GetBytes("$boundary`r`nContent-Type: image/png`r`nContent-Length: $($bytes.Length)`r`n`r`n")
+                $response.OutputStream.Write($writer, 0, $writer.Length)
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                $boundaryWriter = [System.Text.Encoding]::ASCII.GetBytes("`r`n")
+                $response.OutputStream.Write($boundaryWriter, 0, $boundaryWriter.Length)
+
+                Start-Sleep -Milliseconds 33  # ~30 FPS
+            }
+        } else {
+            $response.ContentType = "text/html"
+            $html = @"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Streaming Video</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    background-color: black;
+                    margin: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
+                img {
+                    width: 90vw;
+                    height: auto;
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            </style>
+            </head>
+            <body>
+                <img src='/stream' alt='Streaming Video' />
+            </body>
+            </html>
 "@
-        $buffer = [System.Text.Encoding]::UTF8.GetBytes($refreshScript)
-        $response.OutputStream.Write($buffer, 0, $buffer.Length)
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes($html)
+            $response.OutputStream.Write($buffer, 0, $buffer.Length)
+        }
+        $response.Close()
+    } catch {
+        Write-Host "Error encountered: $_"
     }
-
-    $response.Close()
-    $stream.Dispose()
 }
-
 $webServer.Stop()
-
