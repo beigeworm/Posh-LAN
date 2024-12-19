@@ -248,54 +248,76 @@ while ($webServer.IsListening){try {$ctx = $webServer.GetContext();
 
 Function Screenshare{
 # =========================================================== SCREENSHARE PAGE ======================================================================
-$refreshIntervalInSeconds = 0.5  # Adjust this interval as needed
 while ($true) {
-    $screen = [System.Windows.Forms.Screen]::PrimaryScreen
-    $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
-    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-    $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size)
-    $stream = New-Object System.IO.MemoryStream 
-    $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
-    $stream.Seek(0, [System.IO.SeekOrigin]::Begin) | Out-Null
-    $webServerContext = $webServer.GetContext() 
-    $request = $webServerContext.Request
-    $response = $webServerContext.Response
-        if ($request.RawUrl -eq "/stream") {
-            $response.ContentType = "image/png"
-            $stream.CopyTo($response.OutputStream)
-        }
-        else {
+    try {
+        $context = $webServer.GetContext()
+        $response = $context.Response
+        if ($context.Request.RawUrl -eq "/stream") {
+            $response.ContentType = "multipart/x-mixed-replace; boundary=frame"
+            $response.Headers.Add("Cache-Control", "no-cache")
+            $boundary = "--frame"
+
+            while ($context.Response.OutputStream.CanWrite) {
+                $screen = [System.Windows.Forms.Screen]::PrimaryScreen
+                $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
+                $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+                $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size)
+
+                $stream = New-Object System.IO.MemoryStream
+                $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+                $bitmap.Dispose()
+                $graphics.Dispose()
+
+                $bytes = $stream.ToArray()
+                $stream.Dispose()
+
+                $writer = [System.Text.Encoding]::ASCII.GetBytes("$boundary`r`nContent-Type: image/png`r`nContent-Length: $($bytes.Length)`r`n`r`n")
+                $response.OutputStream.Write($writer, 0, $writer.Length)
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                $boundaryWriter = [System.Text.Encoding]::ASCII.GetBytes("`r`n")
+                $response.OutputStream.Write($boundaryWriter, 0, $boundaryWriter.Length)
+
+                Start-Sleep -Milliseconds 33  # ~30 FPS
+            }
+        } else {
             $response.ContentType = "text/html"
-            $refreshScript = @"
+            $html = @"
             <!DOCTYPE html>
-            <html><head>
-            <title>Streaming Video</title>
-            <meta http-equiv='refresh' content='$refreshIntervalInSeconds'>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <html>
+            <head>
+                <title>Streaming Video</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-            body { font-family: Arial, sans-serif; margin: 30px; background-color: #7c7d71; }
-            .container { display: flex; align-items: center; }
-            a { color: #000; text-decoration: none; font-size: 16px; padding-left: 10px; }
-            button { background-color: #40ad24; color: #FFF; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-            .stop-button { position: relative; top: -5px; font-size: 18px; margin-left: 30px; background-color: #cf2b2b; color: #FFF; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-            img {width: 90vw;height: auto;max-width: 100%;max-height: 100%;}
+                body {
+                    background-color: black;
+                    margin: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
+                img {
+                    width: 90vw;
+                    height: auto;
+                    max-width: 100%;
+                    max-height: 100%;
+                }
             </style>
             </head>
             <body>
-            <div class='container'><h1> LAN Screenshare</h1><a href='/stop'><button class='stop-button'>STOP SERVER</button></a></div><ul>
                 <img src='/stream' alt='Streaming Video' />
             </body>
             </html>
 "@
-            $buffer = [System.Text.Encoding]::UTF8.GetBytes($refreshScript)
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes($html)
             $response.OutputStream.Write($buffer, 0, $buffer.Length)
-            if ($request.RawUrl -eq "/stop") {
-                $WebServer.Stop();
-                break
-            }
         }
-    $response.Close()
-    $stream.Dispose()
+        $response.Close()
+    } catch {
+        Write-Host "Error encountered: $_"
+    }
+}
+$webServer.Stop()
 }}
 
 
