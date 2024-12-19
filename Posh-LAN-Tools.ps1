@@ -1,5 +1,4 @@
-<#
-================================================= Beigeworm's Powershell LAN Toolset ==========================================================
+<# ================================================= Powershell LAN Toolset ==========================================================
 
 SYNOPSIS
 Start up a HTTP server and run a selection of Local Area Network Tools.
