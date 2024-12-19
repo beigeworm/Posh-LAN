@@ -283,8 +283,6 @@ Header
 $Option = Read-Host "===========================================================
 1. File Server - Share files from $hpath
 2. Screenshare - Show $env:COMPUTERNAME's screen
-3. Command Input - Start a PS console for $env:COMPUTERNAME
-4. Remote Access - Pranks and tools
 5. Exit
 ===========================================================
 Choose an Option"
@@ -317,8 +315,6 @@ Write-Host ("Network Devices Can Reach the server at : http://"+$loip+":8080") -
 
 if ($Option -eq '1'){Write-Host "Starting File Server";FileServer}
 if ($Option -eq '2'){Write-Host "Starting Screenshare";Screenshare}
-if ($Option -eq '3'){Write-Host "Starting Command Input";CommandInput}
-if ($Option -eq '4'){Write-Host "Starting Remote Access";RemoteAccess}
 if ($Option -eq '5'){Write-Host "Closing Beigeworm's LAN Toolset.."}
 # ============================================================ END OF SCRIPT =================================================================
 
