@@ -130,39 +130,46 @@ Function DisplayWebpage {
     $html += "th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }"
     $html += "tr:hover { background-color: #909090; }"
     $html += "thead { background-color: #909090; }"
-    $html += "ul { list-style-type: none; padding-left: 0; }"
-    $html += "li { margin-bottom: 5px; }"
-    $html += "textarea { width: 80%; padding: 10px; font-size: 14px; }"
-    $html += "input[type='submit'] { position: relative; top: -15px; margin-left: 30px; padding: 10px 20px; background-color: #cf2b2b; color: #FFF; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; }"
     $html += "button { background-color: #40ad24; color: #FFF; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }"
     $html += ".stop-button { position: relative; top: -5px; font-size: 18px; margin-left: 30px; background-color: #cf2b2b; color: #FFF; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }"
-    $html += "pre { background-color: #f7f7f7; padding: 10px; border-radius: 4px; }"
     $html += "</style></head><body>"
-    $html += "<div class='container'><h1> Simple HTTP Server</h1><a href='/stop'><button class='stop-button'>STOP SERVER</button></a></div><ul>"
+
+    $html += "<div class='container'><h1> Simple HTTP Server</h1><a href='/stop'><button class='stop-button'>STOP SERVER</button></a></div>"
+
+    # Add "Go Up" button if not in root directory
+    if ($folderPath -ne (Get-Location).Path) {
+        $parentFolder = (Get-Item $folderPath).Parent.FullName
+        $parentUrl = "/browse" + $parentFolder.Replace(' ', '%20') -replace [regex]::Escape($PWD.Path.Replace(' ', '%20')), ""
+        $html += "<div class='container'><a href='$parentUrl'><button>⬆ Go Up</button></a></div>"
+    }
+
     $html += "<h3> Root Folder Path : $folderPath </h3><ul>"
     $html += "<ul><table>"
     $html += "<thead><tr><th> FOLDERS</th></tr></thead><tbody>"
+
     foreach ($file in $files) {
         $fileUrl = $file.FullName.Replace(' ', '%20') -replace [regex]::Escape($PWD.Path.Replace(' ', '%20')), ''
-        $fileDetails = "<td>$(Format-FileSize $file.Length)</td><td>$($file.Extension)</td><td>$($file.CreationTime)</td><td>$($file.LastWriteTime)</td>"
         if ($file.PSIsContainer) {
             $html += "<tr><td><a href='/browse$fileUrl'><button>Open Folder</button></a><a>$file</a></td></tr>"
         }
-        else{
-        }}
+    }
+
     $html += "</tbody></table>"
     $html += "<ul><table>"
     $html += "<thead><tr><th> FILES</th><th>Size</th><th>Type</th><th>Created</th><th>Last Modified</th></tr></thead><tbody>"
+
     foreach ($file in $files) {
         $fileUrl = $file.FullName.Replace(' ', '%20') -replace [regex]::Escape($PWD.Path.Replace(' ', '%20')), ''
         $fileDetails = "<td>$(Format-FileSize $file.Length)</td><td>$($file.Extension)</td><td>$($file.CreationTime)</td><td>$($file.LastWriteTime)</td>"
-        if ($file.PSIsContainer){} 
-        else {
+        if (-not $file.PSIsContainer) {
             $html += "<tr><td><a href='/download$fileUrl'><button>Download</button></a><a>$file</a></td>$fileDetails</tr>"
-        }}
+        }
+    }
+
     $html += "</tbody></table>"
     $html += "</ul>"
     $html += "</body></html>"
+
     $buffer = [System.Text.Encoding]::UTF8.GetBytes($html);
     $ctx.Response.ContentLength64 = $buffer.Length;
     $ctx.Response.OutputStream.WriteAsync($buffer, 0, $buffer.Length)
